@@ -1,0 +1,45 @@
+Deployment
+1. kubectl apply -f counter-deployment.yaml
+
+2. check the pod logs
+
+3. Now scale the deployment to 2 by running
+
+4. kubectl scale deployment counter --replicas=2
+
+5. you can see a new pod created, if you check the logs of the new pod, its logs will not start from 1 rather it will start from the last number 
+of the 1st pod.
+
+StatefulSet
+
+1. deploying the sample counter app using a statefulset.
+
+2. kubectl apply -f counter-statefulset.yaml
+
+3. If you deploy the above statefulset, and see the logs of the pod, you will be able to see the log in order like 1,2,3
+
+4. Here, you can see the logs start from 1. Now if we scale up the statefulset to 3 replicas by run
+
+5. kubectl scale statefulsets counter --replicas=3
+
+6. it will first create a new pod counter-1, and once that pod is ready, then another pod counter-2. The new pods will have their own Volume and if you check the logs, 
+the count will again start from 1 for the new pods, unlike in Deployments as we saw earlier.
+
+7. the logs are again starting from 1, as this pod has its own Volume, so it doesn’t read the file of 1st pod. 
+And if we see the Persistent Volume Claims,their will be 3 claims created as we had scaled the replicas to 3.
+
+DaemonSet
+
+A DaemonSet is a controller that ensures that the pod runs on all the nodes of the cluster. If a node is added/removed from a cluster, DaemonSet automatically adds/deletes the pod.
+Some typical use cases of a DaemonSet is to run cluster level applications like:
+Monitoring Exporters: You would want to monitor all the nodes of your cluster so you will need to run a monitor on all the nodes of the cluster like NodeExporter.
+Logs Collection Daemon: You would want to export logs from all nodes so you would need a DaemonSet of log collector like Fluentd to export logs from all your nodes.
+However, Daemonset automatically doesn’t run on nodes which have a taint e.g. Master. You will have to specify the tolerations for it on the pod.
+Taints are a way of telling the nodes to repel the pods i.e. no pods will be schedule on this node unless the pod tolerates the node with the same toleration. The master node is already tainted by:
+
+1. For deploying the sample counter app using a daemonset
+
+kubectl apply -f counter-daemonset.yaml
+
+2. These are the logs of a pod of DaemonSet, you can see the logs are not in order, meaning that all pods are sharing the same Volume. 
+Also only one PVC will be created that all pods will be sharing.
